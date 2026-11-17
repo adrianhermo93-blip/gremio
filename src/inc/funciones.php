@@ -25,7 +25,6 @@ function e(string $texto): string
 /**
  * PARTE 1 · Nombre del rango.
  * E Novato · D Aprendiz · C Veterano · B Experto · A Élite · S Leyenda
- * Uso match con default para que un rango raro no rompa la página.
  */
 function etiquetaRango(string $rango): string
 {
