@@ -1,6 +1,6 @@
 # Memoria · Gremio de Aventureros
 
-**Alumno:** Adrian_Hermida
+**Alumno:** Adrián Hermida Moreno
 
 ## 1. Mi aventurero
 - Usuario que he añadido a la tabla: ______
