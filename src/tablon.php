@@ -18,17 +18,25 @@ $aventurero = requiereLogin();
 $misiones   = require __DIR__ . '/inc/datos_misiones.php';
 $_SESSION['zurron'] ??= [];
 
-// TODO (Parte 3): suma 1 a $_SESSION['visitas'] en cada carga del tablón.
-
 // ---- POST: aceptar una misión --------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // TODO (Parte 2):
-    //  1. Lee $_POST['id'] y busca la misión con buscarMision().
-    //  2. Si no existe → mensajeFlash('Esa misión no existe en el tablón.')
-    //  3. Si ya está en $_SESSION['zurron'] → mensaje de aviso, sin duplicar.
-    //  4. Si no → añade el id a $_SESSION['zurron'] y mensaje de confirmación.
-    //  5. Redirige (header Location + exit) para no reenviar el formulario con F5.
+    $id     = is_string($_POST['id'] ?? null) ? $_POST['id'] : '';
+    $mision = buscarMision($misiones, $id);
+
+    if ($mision === null) {
+        mensajeFlash('Esa misión no existe en el tablón.');
+    } elseif (in_array($id, $_SESSION['zurron'], true)) {
+        mensajeFlash('La misión «' . $mision['titulo'] . '» ya está en tu zurrón.');
+    } else {
+        $_SESSION['zurron'][] = $id;
+        mensajeFlash('Has aceptado la misión «' . $mision['titulo'] . '».');
+    }
+
+    header('Location: tablon.php');
+    exit;
 }
+
+$_SESSION['visitas'] = ($_SESSION['visitas'] ?? 0) + 1;
 
 // ---- GET: filtros ---------------------------------------------------------
 $rango     = leerRangoFiltro($_GET);
@@ -40,7 +48,7 @@ $titulo = 'Tablón de misiones';
 require __DIR__ . '/inc/cabecera.php';
 ?>
 <h1>Tablón de misiones</h1>
-<!-- TODO (Parte 3): muestra la hora de entrada y las visitas de esta sesión. -->
+<p class="nota">Entrada al gremio: <?= e($_SESSION['entrada'] ?? '—') ?> · Visitas al tablón en esta sesión: <?= $_SESSION['visitas'] ?></p>
 <?php if ($flash !== null): ?><p class="aviso"><?= e($flash) ?></p><?php endif; ?>
 
 <form method="get" action="tablon.php" class="filtros">
@@ -71,6 +79,14 @@ require __DIR__ . '/inc/cabecera.php';
         <p class="nota"><?= e($mision['zona']) ?> · <?= $mision['dias'] ?> <?= $mision['dias'] === 1 ? 'día' : 'días' ?></p>
         <p><?= e($mision['descripcion']) ?></p>
         <p class="oro"><?= formatearOro($mision['recompensa']) ?></p>
+        <?php if (in_array($mision['id'], $_SESSION['zurron'], true)): ?>
+            <p class="hecho">✔ En tu zurrón</p>
+        <?php else: ?>
+            <form method="post" action="tablon.php">
+                <input type="hidden" name="id" value="<?= e($mision['id']) ?>">
+                <button type="submit">Aceptar misión</button>
+            </form>
+        <?php endif; ?>
     </article>
 <?php endforeach; ?>
 </div>
