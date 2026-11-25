@@ -63,12 +63,22 @@ function formatearOro(int $oro): string
 
 /**
  * PARTE 2 · Filtra misiones por rango (null = todos) y recompensa mínima.
- * TODO: recorre con foreach y construye un array nuevo. No uses array_filter
- *       todavía: queremos ver el bucle.
  */
 function filtrarMisiones(array $misiones, ?string $rango, int $oroMinimo): array
 {
-    return $misiones; // TODO
+    $resultado = [];
+
+    foreach ($misiones as $mision) {
+        if ($rango !== null && $mision['rango'] !== $rango) {
+            continue;
+        }
+        if ($mision['recompensa'] < $oroMinimo) {
+            continue;
+        }
+        $resultado[] = $mision;
+    }
+
+    return $resultado;
 }
 
 /**
@@ -76,7 +86,13 @@ function filtrarMisiones(array $misiones, ?string $rango, int $oroMinimo): array
  */
 function buscarMision(array $misiones, string $id): ?array
 {
-    return null; // TODO
+    foreach ($misiones as $mision) {
+        if ($mision['id'] === $id) {
+            return $mision;
+        }
+    }
+
+    return null;
 }
 
 /**
@@ -85,7 +101,16 @@ function buscarMision(array $misiones, string $id): ?array
  */
 function totalRecompensa(array $misiones, array $ids): int
 {
-    return 0; // TODO
+    $total = 0;
+
+    foreach ($ids as $id) {
+        $mision = buscarMision($misiones, (string) $id);
+        if ($mision !== null) {
+            $total += $mision['recompensa'];
+        }
+    }
+
+    return $total;
 }
 
 /**
@@ -95,15 +120,29 @@ function totalRecompensa(array $misiones, array $ids): int
  */
 function leerRangoFiltro(array $get): ?string
 {
-    return null; // TODO
+    $rango = $get['rango'] ?? '';
+
+    if (!is_string($rango)) {
+        return null;
+    }
+
+    $rango = strtoupper(trim($rango));
+
+    return in_array($rango, RANGOS, true) ? $rango : null;
 }
 
 /**
  * PARTE 2 · Lee $_GET['oro'] y lo valida como entero entre 0 y 10000.
  * Si no viene o no es válido, 0.
- * TODO: filter_var con FILTER_VALIDATE_INT y opciones min_range / max_range.
  */
 function leerOroMinimo(array $get): int
 {
-    return 0; // TODO
+    $oro = filter_var($get['oro'] ?? '', FILTER_VALIDATE_INT, [
+        'options' => [
+            'min_range' => 0,
+            'max_range' => 10000,
+        ],
+    ]);
+
+    return $oro === false ? 0 : $oro;
 }
